@@ -21,40 +21,6 @@ function Camera() {
    const [canUseGeo, setCanUseGeo] = useState(false);
    const [staticImg, setStaticImg] = useState([vader, naruto][0]);
 
-   // const [locationMessage, setLocationMessage] = useState([]);
-   // const [currPosition, setCurrPosition] = useState(null);
-
-   // async function onSuccsess(pos) {
-   //    console.log('current position is:', pos);
-   //    const adress = await lookupPosition(pos.coords.latitude, pos.coords.longitude);
-   //    if (adress) {
-   //       console.log(adress);
-   //       console.log(time);
-   //    }
-   // }
-
-   // async function lookupPosition(lat, lon) {
-   //    try {
-   //       const response = await fetch(
-   //          `https://geocode.xyz/${lat},${lon}?geoit=json`
-   //       );
-   //       const data = await response.json();
-   //       if (data.error) {
-   //          console.log('Could not get position');
-   //          return null;
-   //       }
-   //       console.log(data);
-   //       return data;
-   //    } catch (error) {
-   //       console.log('No position');
-   //       return null;
-   //    }
-   // }
-
-   // useEffect(() => {
-   //    onSuccsess();
-   // }, []);
-
    async function getGeoData(lat, long) {
       try {
          const res = await fetch(`${API_URL}&q=${lat}+${long}`);
@@ -80,24 +46,19 @@ function Camera() {
       photo.height = height;
 
       photo.getContext('2d').drawImage(video, 0, 0, width, height);
-      console.log(1);
+
       await photo.toBlob(
          (blob) => {
-            console.log(2);
             navigator.geolocation.getCurrentPosition(
                async (pos) => {
-                  console.log(3, pos);
-
                   const { country, city, road } = await getGeoData(
                      pos.coords.latitude,
                      pos.coords.longitude
                   );
-                  console.log(4);
 
                   const localTime = new Date(pos.timestamp).toLocaleTimeString();
                   setTime(localTime);
 
-                  console.log(country, city, road);
                   const picture = {
                      alt: 'Photo from camera',
                      url: URL.createObjectURL(blob),
@@ -171,7 +132,6 @@ function Camera() {
          }
 
          counter--;
-         console.log(counter);
       }, 300);
    }
 
