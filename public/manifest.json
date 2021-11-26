@@ -3,17 +3,17 @@
    "name": "InstaBlam",
    "icons": [
       {
-         "src": "../src/assets/movieicon.png",
+         "src": "./manifestAsset/movieicon.png",
          "sizes": "64x64 32x32 24x24 16x16",
          "type": "image/x-icon"
       },
       {
-         "src": "../src/assets/movieicon-192.png",
+         "src": "./manifestAsset/movieicon-192.png",
          "type": "image/png",
          "sizes": "192x192"
       },
       {
-         "src": "../src/assets/movieicon-512.png",
+         "src": "./manifestAsset/movieicon-512.png",
          "type": "image/png",
          "sizes": "512x512"
       }
