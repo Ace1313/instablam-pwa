@@ -6,6 +6,7 @@ import naruto from '../../assets/naruto.jpg';
 import styled from 'styled-components';
 import { BsCameraFill, BsCameraReelsFill, BsDownload } from 'react-icons/bs';
 import { MdOutlineAvTimer, MdDelete } from 'react-icons/md';
+import { blue } from '@mui/material/colors';
 
 function Camera() {
    const API_KEY = process.env.REACT_APP_API_KEY;
@@ -158,7 +159,6 @@ function Camera() {
          {canUseMd ? <video className="video-window" ref={videoRef}></video> : null}
          <div className="main-container">
             <Button className="btns" variant="Primary" onClick={toggleCameraBtn}>
-               <BsCameraReelsFill />
                {camerIsOn ? 'Stop Camera' : 'Start Camera'}
             </Button>
             <Button
@@ -295,7 +295,7 @@ const PicWrapper = styled.div`
    }
 
    .imgContainer .download-btn {
-      background-color: peru;
+      background-color: #afd275;
    }
 `;
 
