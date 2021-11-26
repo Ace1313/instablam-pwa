@@ -4,9 +4,8 @@ import Button from '@mui/material/Button';
 import vader from '../../assets/vader.jpg';
 import naruto from '../../assets/naruto.jpg';
 import styled from 'styled-components';
-import { BsCameraFill, BsCameraReelsFill, BsDownload } from 'react-icons/bs';
+import { BsCameraFill, BsDownload } from 'react-icons/bs';
 import { MdOutlineAvTimer, MdDelete } from 'react-icons/md';
-import { blue } from '@mui/material/colors';
 
 function Camera() {
    const API_KEY = process.env.REACT_APP_API_KEY;
