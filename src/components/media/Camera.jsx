@@ -197,26 +197,18 @@ function Camera() {
       <PicWrapper>
          {canUseMd ? <video className="video-window" ref={videoRef}></video> : null}
          <div className="main-container">
-            <Button
-               style={{ backgroundColor: 'yellow' }}
-               variant="Primary"
-               onClick={toggleCameraBtn}
-            >
+            <Button className="btns" variant="Primary" onClick={toggleCameraBtn}>
                <BsCameraReelsFill />
                {camerIsOn ? 'Stop Camera' : 'Start Camera'}
             </Button>
             <Button
-               style={{ backgroundColor: 'green' }}
+               className="btns"
                variant="Primary"
                onClick={videoStream ? takePicture : null}
             >
                <BsCameraFill />
             </Button>
-            <Button
-               style={{ backgroundColor: 'red' }}
-               variant="Primary"
-               onClick={timerHandler}
-            >
+            <Button className="btns" variant="Primary" onClick={timerHandler}>
                <MdOutlineAvTimer />
             </Button>
          </div>
@@ -268,9 +260,29 @@ const PicWrapper = styled.div`
       padding: 0;
    }
 
+   p {
+      color: #950740;
+      font-weight: bolder;
+   }
+
+   .main-container {
+      padding: 1em;
+      display: flex;
+      justify-content: center;
+      justify-content: space-evenly;
+   }
+
+   .btns {
+      background: #e7717d;
+      width: 7em;
+      height: 3em;
+   }
+
    a {
       text-decoration: none;
       color: black;
+      height: 1.5em;
+      border-radius: 8px;
    }
 
    .video-window {
@@ -303,7 +315,6 @@ const PicWrapper = styled.div`
       width: 100%;
       display: grid;
       justify-content: center;
-
       flex-wrap: wrap;
       padding: 40px 0 0 0;
    }
