@@ -8,75 +8,138 @@ import { BsCameraFill, BsCameraReelsFill, BsDownload } from 'react-icons/bs';
 import { MdOutlineAvTimer, MdDelete } from 'react-icons/md';
 
 function Camera() {
+   const API_KEY = process.env.REACT_APP_API_KEY;
+   const API_URL = `https://api.opencagedata.com/geocode/v1/json?key=${API_KEY}`;
+
    const videoRef = useRef(null);
    const imgRef = useRef();
    const [canUseMd, setCanUseMd] = useState(false);
    const [camerIsOn, setCameraIsOn] = useState(false);
    const { videoStream, setVideoStream } = useContext(MediaContext);
-   const [images, setImages] = useState([vader, naruto]);
-   const [time, setTime] = useState(null);
+   const [images, setImages] = useState([{ url: vader }, { url: naruto }]);
+   const [time, setTime] = useState();
    const [canUseGeo, setCanUseGeo] = useState(false);
    const [staticImg, setStaticImg] = useState([vader, naruto][0]);
-   const [locationMessage, setLocationMessage] = useState([]);
 
-   useEffect(() => {
-      setCanUseMd('mediaDevices' in navigator);
-      setCanUseGeo('geolocation' in navigator);
-   }, []);
+   // const [locationMessage, setLocationMessage] = useState([]);
+   // const [currPosition, setCurrPosition] = useState(null);
 
-   async function onSuccsess(pos) {
-      console.log('current position is:', pos);
-      const adress = await lookupPosition(pos.coords.latitude, pos.coords.longitude);
-      if (adress) {
-         console.log(adress);
-         setLocationMessage(adress);
-         setTime(new Date().toLocaleString());
-         console.log(time);
-      }
-   }
+   // async function onSuccsess(pos) {
+   //    console.log('current position is:', pos);
+   //    const adress = await lookupPosition(pos.coords.latitude, pos.coords.longitude);
+   //    if (adress) {
+   //       console.log(adress);
+   //       console.log(time);
+   //    }
+   // }
 
-   async function lookupPosition(lat, lon) {
+   // async function lookupPosition(lat, lon) {
+   //    try {
+   //       const response = await fetch(
+   //          `https://geocode.xyz/${lat},${lon}?geoit=json`
+   //       );
+   //       const data = await response.json();
+   //       if (data.error) {
+   //          console.log('Could not get position');
+   //          return null;
+   //       }
+   //       console.log(data);
+   //       return data;
+   //    } catch (error) {
+   //       console.log('No position');
+   //       return null;
+   //    }
+   // }
+
+   // useEffect(() => {
+   //    onSuccsess();
+   // }, []);
+
+   async function getGeoData(lat, long) {
       try {
-         const response = await fetch(
-            `https://geocode.xyz/${lat},${lon}?geoit=json`
-         );
-         const data = await response.json();
-         if (data.error) {
-            console.log('Could not get position');
-            return null;
+         const res = await fetch(`${API_URL}&q=${lat}+${long}`);
+         const data = await res.json();
+         const geoData = data.results[0].components;
+
+         if (!res.ok) {
+            throw new Error('Failed to fetch geo-data');
          }
-         console.log(data);
-         return data;
+
+         return geoData;
       } catch (error) {
-         console.log('No position');
-         return null;
+         console.log(error);
       }
    }
 
    async function takePicture() {
       const width = 414;
       const height = width / (16 / 9);
-
       let video = videoRef.current;
       let photo = imgRef.current;
-
       photo.width = width;
       photo.height = height;
 
       photo.getContext('2d').drawImage(video, 0, 0, width, height);
+      console.log(1);
       await photo.toBlob(
-         (blob) => setImages([...images, URL.createObjectURL(blob)]),
-         'image/jpeg',
+         (blob) => {
+            console.log(2);
+            navigator.geolocation.getCurrentPosition(
+               async (pos) => {
+                  console.log(3, pos);
+
+                  const { country, city, road } = await getGeoData(
+                     pos.coords.latitude,
+                     pos.coords.longitude
+                  );
+                  console.log(4);
+
+                  const localTime = new Date(pos.timestamp).toLocaleTimeString();
+                  setTime(localTime);
+
+                  console.log(country, city, road);
+                  const picture = {
+                     alt: 'Photo from camera',
+                     url: URL.createObjectURL(blob),
+                     location: { country, city, road },
+                     time: localTime,
+                  };
+
+                  setImages([...images, picture]);
+               },
+               (error) => {
+                  console.log(error.message);
+                  const picture = {
+                     alt: 'Photo from camera',
+                     url: URL.createObjectURL(blob),
+                     location: {
+                        country: 'Unknown',
+                        city: 'Unknown',
+                        road: 'Unkown',
+                     },
+                     time: 'Cannot get time',
+                  };
+
+                  setImages([...images, picture]);
+               }
+            );
+         },
+         'images/jpeg',
          1
       );
-      if (navigator.geolocation.getCurrentPosition(onSuccsess)) {
-         takePicture();
-      } else {
-         console.log('No location');
-         setLocationMessage('Unknown location');
-         console.log(locationMessage);
-      }
    }
+
+   useEffect(() => {
+      if ('geolocation' in navigator) {
+         setCanUseGeo(true);
+      } else {
+         setCanUseGeo(false);
+      }
+   }, []);
+
+   useEffect(() => {
+      setCanUseMd('mediaDevices' in navigator);
+   }, []);
 
    const removeImg = (index) => {
       const newList = (images) => images.filter((_, i) => i !== index);
@@ -98,23 +161,6 @@ function Camera() {
          startCamera(videoRef.current, setCameraIsOn(true));
       }
    }
-
-   // const downloadHandler = async (img) => {
-   //    const originalImage = img;
-
-   //    const image = await fetch(originalImage);
-
-   //    const nameSplit = originalImage.split('/');
-   //    const duplicateName = nameSplit.pop();
-
-   //    const imageBlog = await image.blob();
-   //    const imageURL = URL.createObjectURL(imageBlog);
-
-   //    const link = document.createElement('a');
-   //    link.href = imageURL;
-   //    link.download = '' + duplicateName + '';
-   //    link.click();
-   // };
 
    function timerHandler() {
       let counter = 3;
@@ -176,16 +222,18 @@ function Camera() {
          </div>
          <canvas hidden={true} ref={imgRef}></canvas>
          <img src={staticImg} alt="" className="selected" />
+
          <div className="container">
-            {images.map((pic, i) => (
+            {images.map((obj, i) => (
                <div className="imgContainer" key={i}>
-                  <img
-                     key={i}
-                     style={{ border: pic === images ? '4px solid purple' : '' }}
-                     src={pic}
-                     alt="booth"
-                     onClick={() => setStaticImg(pic)}
-                  />
+                  {
+                     <img
+                        key={i}
+                        src={obj.url}
+                        alt="booth"
+                        onClick={() => setStaticImg(obj.url)}
+                     />
+                  }
                   <Button
                      variant="Primary"
                      className="delete-btn"
@@ -193,22 +241,19 @@ function Camera() {
                   >
                      <MdDelete className="delete-icon" />
                   </Button>
-                  <a
-                     download
-                     className="download-btn"
-                     href={pic}
-                     // variant="Primary"
-                     // onClick={() => downloadHandler(pic)}
-                  >
+                  <a download className="download-btn" href={obj.url}>
                      Download <BsDownload />
                   </a>
-                  {
+                  {canUseGeo ? (
                      <div>
-                        <p>{locationMessage.country}</p>
-                        <p>{locationMessage.city}</p>
-                        <p>{time}</p>
+                        <p> {obj?.location?.country} </p>
+                        <p> {obj?.location?.city} </p>
+                        <p> {obj?.location?.road}</p>
+                        <p>{time && obj.time}</p>
                      </div>
-                  }
+                  ) : (
+                     'location unknown'
+                  )}
                </div>
             ))}
          </div>
